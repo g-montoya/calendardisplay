@@ -1,0 +1,8 @@
+config.yaml
+venv/
+.venv/
+__pycache__/
+*.pyc
+cache/
+*.log
+.claude/

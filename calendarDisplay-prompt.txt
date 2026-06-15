@@ -1,0 +1,60 @@
+# Project: calendar + task wall display for a Raspberry Pi (Git-deployed)
+
+Build a self-hosted, always-on dashboard that runs on a Raspberry Pi (64-bit Raspberry Pi OS) and drives an **InnoView portable monitor over HDMI**. Assume **1920×1080 landscape** as the default but keep the layout fully responsive so it adapts to the actual panel — do not hardcode pixel dimensions. **No AI, no LLM calls — purely deterministic display logic.**
+
+The repo will be developed on a Windows PC with Claude Code, pushed to a **private GitHub repo**, and deployed to the Pi over SSH via `git clone`. Design for that workflow.
+
+## Goal
+A kiosk web app, served locally by the Pi and shown full-screen in Chromium:
+- **Left column (~62% width):** a vertical day-timeline of today's events merged from multiple calendars, with a live "now" indicator (a horizontal line + a small left-edge arrow) that moves down the timeline in real time.
+- **Right column (~38% width):** the current task list.
+
+## Ship a working v1 first
+Build the minimal working path before anything optional: **ICS calendar feeds + a local `tasks.json` + the kiosk display.** Treat Asana as a later, optional adapter behind a config flag — it is NOT needed for v1.
+
+## Hard constraints
+- No AI/LLM, no external services beyond calendar feeds. Deterministic only.
+- Minimal dependencies. Python backend (Flask or FastAPI). Frontend = vanilla HTML/CSS/JS, **no build step** (no npm/React/webpack) so it runs reliably on a Pi.
+- Offline-tolerant: cache the last successful calendar fetch and keep displaying it if the network drops.
+- All settings in one config file. **Config containing secrets must never be committed to Git** (see Deployment).
+
+## Stack
+- **Backend:** Python 3.11+, Flask (or FastAPI + uvicorn). Serves the static frontend and a small JSON API (`/api/events`, `/api/tasks`).
+- **Calendar parsing:** `icalendar` + `recurring-ical-events` to expand RRULE recurring events for the current day. Handle timezones correctly — convert all event times to the configured local timezone; do NOT assume UTC == local. This is the most common bug.
+- **Frontend:** one `index.html` + `style.css` + `app.js`, vanilla JS polling the local API. Dark theme, large high-contrast fonts (read at a glance).
+- **Task storage:** a local `tasks.json` file (a separate process writes to it later). Read-only display in v1.
+
+## Data sources
+### Calendars
+- A list of ICS subscription URLs in config — each is a calendar's private feed (Google Calendar's "Secret address in iCal format", or an Outlook/M365 published ICS link). Merge all feeds.
+- Configurable color per source. Expand recurring events for today; show all-day events in a small band atop the timeline.
+
+### Tasks
+- Read from `tasks.json`. Schema: `{ "id": str, "title": str, "due": ISO8601 | null, "section": str, "priority": 1-3 | null, "done": bool }`.
+- Display incomplete tasks grouped by `section`, sorted by `due` then `priority`. Show due time; flag overdue in a warning color.
+- (Optional, behind a config flag, post-v1) An Asana adapter that maps Asana tasks into this same schema as a pluggable module.
+
+## Layout & behavior
+- Header: current date (large) + a live clock (updates every second).
+- **Left timeline:** vertical axis over configurable working hours (default 06:00–22:00) with hour gridlines/labels. Events as blocks positioned/sized by start/end, colored by source, title + time; lay overlapping events side by side. The "now" line spans the timeline at the current time with a left-edge arrow; recompute every 30s and keep it in view.
+- **Right column:** section headers + task rows.
+- Refresh with no manual reloads: clock text every 1s, now-line every 30s, calendars every N minutes (default 10) with last-good caching + a small "stale since HH:MM" note on failure, tasks re-read every 30s. Self-recover from fetch errors.
+
+## Deployment (Git + SSH)
+- **Initialize the git repo with `.gitignore` committed first**, so `config.yaml` is never tracked. `.gitignore` must exclude: `config.yaml`, `venv/` / `.venv/`, `__pycache__/`, `*.pyc`, and any local data/cache files.
+- Commit a `config.example.yaml` with placeholder values (this is the only config in Git).
+- Provide `setup.sh` that: creates a venv, installs deps, installs a `systemd` unit (runs the server on boot, restarts on failure), and configures Chromium kiosk autostart (`--kiosk`, full-screen, hidden cursor, screen blanking/DPMS disabled, pointing at `http://localhost:PORT`).
+- `README.md` must document the full flow end to end:
+  1. On the PC: `git push` to the private GitHub repo.
+  2. On the Pi (over SSH): `git clone` the repo, `cp config.example.yaml config.yaml`, fill in the ICS URLs, run `./setup.sh`, reboot.
+  3. Updating later: `git pull` + restart the systemd service.
+  4. How to get the ICS URLs (Google secret iCal address; Outlook publish), and how to add tasks to `tasks.json` by hand.
+
+## Config (`config.yaml`, gitignored; `config.example.yaml` committed)
+`timezone`, `calendars: [{ name, ics_url, color }]`, `working_hours_start/end`, `calendar_refresh_minutes`, `port`, `tasks_file`, optional `asana: { enabled, token, project_ids }`.
+
+## Acceptance
+- Nothing secret is ever committed to Git (verify `config.yaml` is gitignored from the first commit).
+- After `git clone` + filling `config.yaml` + `./setup.sh` + reboot: the Pi boots straight into the full-screen display; left shows today's merged events with a live now-line; right shows tasks from `tasks.json`; everything refreshes unattended and survives a network drop.
+
+Scaffold the repo + `.gitignore` + config example first, then the backend API, then the frontend, then the deployment scripts and README. Keep it simple and dependency-light.

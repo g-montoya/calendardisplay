@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calendar &amp; Task Wall</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-date" id="header-date"></div>
+    <div class="header-clock" id="header-clock"></div>
+  </header>
+
+  <main class="main">
+    <section class="timeline-col">
+      <div class="allday-band" id="allday-band"></div>
+      <div class="timeline" id="timeline">
+        <div class="timeline-grid" id="timeline-grid"></div>
+        <div class="timeline-events" id="timeline-events"></div>
+        <div class="now-line" id="now-line">
+          <div class="now-arrow"></div>
+        </div>
+      </div>
+      <div class="stale-note" id="stale-note"></div>
+    </section>
+
+    <section class="tasks-col" id="tasks-col">
+      <h2 class="tasks-title">Tasks</h2>
+      <div class="tasks-list" id="tasks-list"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

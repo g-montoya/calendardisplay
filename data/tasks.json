@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "title": "Reply to client email",
+    "due": "2026-06-15T10:00:00-07:00",
+    "section": "Today",
+    "priority": 1,
+    "done": false
+  },
+  {
+    "id": "2",
+    "title": "Pay invoice #4471",
+    "due": "2026-06-15T17:00:00-07:00",
+    "section": "Today",
+    "priority": 2,
+    "done": false
+  },
+  {
+    "id": "3",
+    "title": "Order printer toner",
+    "due": null,
+    "section": "This Week",
+    "priority": 3,
+    "done": false
+  },
+  {
+    "id": "4",
+    "title": "Review Q3 budget draft",
+    "due": "2026-06-17T12:00:00-07:00",
+    "section": "This Week",
+    "priority": 2,
+    "done": false
+  },
+  {
+    "id": "5",
+    "title": "Renew domain registration",
+    "due": "2026-06-10T00:00:00-07:00",
+    "section": "Overdue",
+    "priority": 1,
+    "done": false
+  }
+]

@@ -1,0 +1,255 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0c10;
+  color: #f2f2f2;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 1.2vh 2vw;
+  border-bottom: 2px solid #2a2d35;
+  flex-shrink: 0;
+}
+
+.header-date {
+  font-size: clamp(1.5rem, 3.2vw, 3.2rem);
+  font-weight: 600;
+}
+
+.header-clock {
+  font-size: clamp(1.5rem, 3.2vw, 3.2rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #8ab4f8;
+}
+
+/* ---------- Main layout ---------- */
+
+.main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.timeline-col {
+  width: 62%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 2px solid #2a2d35;
+}
+
+.tasks-col {
+  width: 38%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 1.5vh 1.5vw;
+  overflow-y: auto;
+}
+
+/* ---------- All-day band ---------- */
+
+.allday-band {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5vh 0.6vw;
+  padding: 0.6vh 1vw;
+  min-height: 0;
+  border-bottom: 1px solid #2a2d35;
+}
+
+.allday-band:empty {
+  display: none;
+  border-bottom: none;
+}
+
+.allday-chip {
+  font-size: clamp(0.9rem, 1.4vw, 1.4rem);
+  padding: 0.3vh 0.8vw;
+  border-radius: 0.4vw;
+  font-weight: 600;
+  color: #0b0c10;
+}
+
+/* ---------- Timeline ---------- */
+
+.timeline {
+  position: relative;
+  flex: 1;
+  margin: 1vh 1vw 1vh 5vw;
+  min-height: 0;
+}
+
+.timeline-grid {
+  position: absolute;
+  inset: 0;
+}
+
+.hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid #23252c;
+}
+
+.hour-label {
+  position: absolute;
+  left: -4.6vw;
+  width: 4.2vw;
+  text-align: right;
+  font-size: clamp(0.8rem, 1.2vw, 1.3rem);
+  color: #8a8f99;
+  transform: translateY(-0.7em);
+}
+
+.timeline-events {
+  position: absolute;
+  inset: 0;
+}
+
+.event-block {
+  position: absolute;
+  border-radius: 0.4vw;
+  padding: 0.3vh 0.6vw;
+  overflow: hidden;
+  color: #0b0c10;
+  font-weight: 600;
+  line-height: 1.25;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.event-title {
+  font-size: clamp(0.85rem, 1.35vw, 1.35rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-time {
+  font-size: clamp(0.7rem, 1.05vw, 1.05rem);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+/* ---------- Now line ---------- */
+
+.now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 3px solid #ff4d4d;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.now-arrow {
+  position: absolute;
+  left: -1.2vw;
+  top: -0.7vh;
+  width: 0;
+  height: 0;
+  border-top: 0.9vh solid transparent;
+  border-bottom: 0.9vh solid transparent;
+  border-left: 1.2vw solid #ff4d4d;
+}
+
+/* ---------- Stale note ---------- */
+
+.stale-note {
+  font-size: clamp(0.75rem, 1.1vw, 1.1rem);
+  color: #ffb74d;
+  padding: 0.4vh 1vw;
+  min-height: 1.6em;
+}
+
+.stale-note:empty {
+  display: none;
+}
+
+/* ---------- Tasks ---------- */
+
+.tasks-title {
+  font-size: clamp(1.3rem, 2.4vw, 2.4rem);
+  font-weight: 700;
+  margin-bottom: 1vh;
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5vh;
+}
+
+.task-section-title {
+  font-size: clamp(1.05rem, 1.7vw, 1.7rem);
+  font-weight: 700;
+  color: #8ab4f8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5vh;
+  border-bottom: 1px solid #2a2d35;
+  padding-bottom: 0.3vh;
+}
+
+.task-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1vw;
+  font-size: clamp(0.95rem, 1.6vw, 1.6rem);
+  padding: 0.4vh 0.2vw;
+}
+
+.task-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-due {
+  font-variant-numeric: tabular-nums;
+  color: #8a8f99;
+  flex-shrink: 0;
+}
+
+.task-row.overdue .task-due {
+  color: #ff6b6b;
+  font-weight: 700;
+}
+
+.task-row.overdue .task-title {
+  color: #ff8a8a;
+}
+
+.task-row .priority-marker {
+  width: 0.5em;
+  flex-shrink: 0;
+}
+
+.empty-note {
+  color: #8a8f99;
+  font-size: clamp(0.9rem, 1.4vw, 1.4rem);
+  padding: 0.5vh 0;
+}

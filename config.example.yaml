@@ -1,0 +1,30 @@
+# Copy this file to config.yaml and fill in your real values.
+# config.yaml is gitignored — never commit it.
+
+timezone: America/Los_Angeles
+
+calendars:
+  - name: Personal
+    ics_url: "https://calendar.google.com/calendar/ical/REPLACE_ME/private-XXXXXXXX/basic.ics"
+    color: "#4285F4"
+  - name: Work
+    ics_url: "https://outlook.office365.com/owa/calendar/REPLACE_ME/calendar.ics"
+    color: "#34A853"
+
+working_hours_start: "06:00"
+working_hours_end: "22:00"
+
+# How often to re-fetch calendar feeds, in minutes
+calendar_refresh_minutes: 10
+
+# Port the Flask server listens on
+port: 8080
+
+# Path to the tasks file (read-only display in v1)
+tasks_file: "data/tasks.json"
+
+# Optional Asana adapter — not used in v1
+asana:
+  enabled: false
+  token: ""
+  project_ids: []

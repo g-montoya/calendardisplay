@@ -1,0 +1,6 @@
+Flask==3.0.3
+PyYAML==6.0.2
+icalendar==5.0.13
+recurring-ical-events==2.2.0
+requests==2.32.3
+tzdata==2024.1
