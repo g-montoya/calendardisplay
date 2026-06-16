@@ -15,16 +15,6 @@
   const einkMode = new URLSearchParams(window.location.search).get("eink") === "1";
   if (einkMode) document.body.classList.add("eink");
 
-  // ---------- Fullscreen ----------
-
-  document.getElementById("fullscreen-btn").addEventListener("click", () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
-    }
-  });
-
   // ---------- Header: date + clock ----------
 
   function updateClock() {
@@ -273,10 +263,23 @@
     }
   }
 
+  // ---------- Midnight reload ----------
+  // When the calendar day rolls over, reload the page so the timeline and
+  // event data reset cleanly for the new day.
+
+  const startDay = new Date().toDateString();
+
+  function checkMidnight() {
+    if (new Date().toDateString() !== startDay) {
+      location.reload();
+    }
+  }
+
   // ---------- Init ----------
 
   updateClock();
   setInterval(updateClock, 1000);
+  setInterval(checkMidnight, 60 * 1000);
 
   refreshEvents();
   setInterval(refreshEvents, EVENTS_POLL_MS);

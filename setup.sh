@@ -76,24 +76,32 @@ EOF
 cat > "$REPO_DIR/kiosk.sh" <<EOF
 #!/usr/bin/env bash
 # Disable screen blanking / DPMS, then launch Chromium in kiosk mode.
-xset s off || true
-xset s noblank || true
-xset -dpms || true
+# DBUS_SESSION_BUS_ADDRESS is unset so Chromium cannot prompt for a keyring
+# password — which would otherwise block startup with a modal dialog.
+unset DBUS_SESSION_BUS_ADDRESS
 
-# Wait for the local server to come up.
+xset s off    || true
+xset s noblank || true
+xset -dpms    || true
+
+# Wait for the local server to come up (up to 30 s).
 for i in \$(seq 1 30); do
-  curl -s "http://localhost:$PORT/" > /dev/null && break
+  curl -sf "http://localhost:$PORT/" > /dev/null && break
   sleep 1
 done
 
+# --password-store=basic: skip keyring/wallet prompts entirely
+# --kiosk: true full-screen, no address bar, no window chrome
 chromium-browser \\
   --noerrdialogs \\
   --disable-infobars \\
   --kiosk \\
-  --incognito \\
+  --password-store=basic \\
   --no-first-run \\
+  --disable-translate \\
+  --disable-features=TranslateUI \\
   --check-for-update-interval=31536000 \\
-  "http://localhost:$PORT" &
+  "http://localhost:$PORT"
 EOF
 chmod +x "$REPO_DIR/kiosk.sh"
 
