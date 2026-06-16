@@ -18,24 +18,44 @@ body {
   flex-direction: column;
 }
 
+/* ---------- Fullscreen button ---------- */
+
+.fullscreen-btn {
+  position: fixed;
+  top: 0.6vh;
+  right: 0.6vw;
+  z-index: 100;
+  background: rgba(255,255,255,0.07);
+  border: none;
+  color: #555;
+  font-size: 1rem;
+  padding: 0.3vh 0.5vw;
+  cursor: pointer;
+  border-radius: 4px;
+  line-height: 1;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+.fullscreen-btn:hover { opacity: 1; }
+
 /* ---------- Header ---------- */
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 1.2vh 2vw;
+  padding: 0.8vh 2vw;
   border-bottom: 2px solid #2a2d35;
   flex-shrink: 0;
 }
 
 .header-date {
-  font-size: clamp(1.5rem, 3.2vw, 3.2rem);
+  font-size: clamp(1rem, 1.8vw, 1.8rem);
   font-weight: 600;
 }
 
 .header-clock {
-  font-size: clamp(1.5rem, 3.2vw, 3.2rem);
+  font-size: clamp(1rem, 1.8vw, 1.8rem);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: #8ab4f8;
@@ -62,7 +82,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding: 1.5vh 1.5vw;
+  padding: 1vh 1.2vw;
   overflow-y: auto;
 }
 
@@ -71,8 +91,8 @@ body {
 .allday-band {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5vh 0.6vw;
-  padding: 0.6vh 1vw;
+  gap: 0.4vh 0.5vw;
+  padding: 0.4vh 1vw;
   min-height: 0;
   border-bottom: 1px solid #2a2d35;
 }
@@ -83,9 +103,9 @@ body {
 }
 
 .allday-chip {
-  font-size: clamp(0.9rem, 1.4vw, 1.4rem);
-  padding: 0.3vh 0.8vw;
-  border-radius: 0.4vw;
+  font-size: clamp(0.7rem, 1vw, 1rem);
+  padding: 0.2vh 0.6vw;
+  border-radius: 0.3vw;
   font-weight: 600;
   color: #0b0c10;
 }
@@ -95,7 +115,7 @@ body {
 .timeline {
   position: relative;
   flex: 1;
-  margin: 1vh 1vw 1vh 5vw;
+  margin: 1vh 0.8vw 1vh 4.5vw;
   min-height: 0;
 }
 
@@ -113,10 +133,10 @@ body {
 
 .hour-label {
   position: absolute;
-  left: -4.6vw;
-  width: 4.2vw;
+  left: -4.3vw;
+  width: 3.9vw;
   text-align: right;
-  font-size: clamp(0.8rem, 1.2vw, 1.3rem);
+  font-size: clamp(0.65rem, 0.9vw, 0.9rem);
   color: #8a8f99;
   transform: translateY(-0.7em);
 }
@@ -128,26 +148,20 @@ body {
 
 .event-block {
   position: absolute;
-  border-radius: 0.4vw;
-  padding: 0.3vh 0.6vw;
+  border-radius: 0.3vw;
+  padding: 0.2vh 0.5vw;
   overflow: hidden;
   color: #0b0c10;
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.2;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 
 .event-title {
-  font-size: clamp(0.85rem, 1.35vw, 1.35rem);
+  font-size: clamp(0.7rem, 1vw, 1rem);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.event-time {
-  font-size: clamp(0.7rem, 1.05vw, 1.05rem);
-  opacity: 0.8;
-  white-space: nowrap;
 }
 
 /* ---------- Now line ---------- */
@@ -164,22 +178,22 @@ body {
 
 .now-arrow {
   position: absolute;
-  left: -1.2vw;
-  top: -0.7vh;
+  left: -1vw;
+  top: -0.6vh;
   width: 0;
   height: 0;
-  border-top: 0.9vh solid transparent;
-  border-bottom: 0.9vh solid transparent;
-  border-left: 1.2vw solid #ff4d4d;
+  border-top: 0.7vh solid transparent;
+  border-bottom: 0.7vh solid transparent;
+  border-left: 1vw solid #ff4d4d;
 }
 
 /* ---------- Stale note ---------- */
 
 .stale-note {
-  font-size: clamp(0.75rem, 1.1vw, 1.1rem);
+  font-size: clamp(0.65rem, 0.9vw, 0.9rem);
   color: #ffb74d;
-  padding: 0.4vh 1vw;
-  min-height: 1.6em;
+  padding: 0.3vh 1vw;
+  min-height: 1.4em;
 }
 
 .stale-note:empty {
@@ -189,35 +203,35 @@ body {
 /* ---------- Tasks ---------- */
 
 .tasks-title {
-  font-size: clamp(1.3rem, 2.4vw, 2.4rem);
+  font-size: clamp(1rem, 1.6vw, 1.6rem);
   font-weight: 700;
-  margin-bottom: 1vh;
+  margin-bottom: 0.8vh;
 }
 
 .tasks-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5vh;
+  gap: 1vh;
 }
 
 .task-section-title {
-  font-size: clamp(1.05rem, 1.7vw, 1.7rem);
+  font-size: clamp(0.8rem, 1.1vw, 1.1rem);
   font-weight: 700;
   color: #8ab4f8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.5vh;
+  margin-bottom: 0.3vh;
   border-bottom: 1px solid #2a2d35;
-  padding-bottom: 0.3vh;
+  padding-bottom: 0.2vh;
 }
 
 .task-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1vw;
-  font-size: clamp(0.95rem, 1.6vw, 1.6rem);
-  padding: 0.4vh 0.2vw;
+  gap: 0.8vw;
+  font-size: clamp(0.75rem, 1.1vw, 1.1rem);
+  padding: 0.2vh 0.2vw;
 }
 
 .task-title {
@@ -243,13 +257,138 @@ body {
   color: #ff8a8a;
 }
 
-.task-row .priority-marker {
-  width: 0.5em;
-  flex-shrink: 0;
-}
-
 .empty-note {
   color: #8a8f99;
-  font-size: clamp(0.9rem, 1.4vw, 1.4rem);
-  padding: 0.5vh 0;
+  font-size: clamp(0.75rem, 1vw, 1rem);
+  padding: 0.4vh 0;
+}
+
+/* ================================================================
+   E-INK THEME
+   Apply by adding class "eink" to <body>:
+     body.eink — light background, black text, pattern event blocks
+   ================================================================ */
+
+body.eink {
+  background: #fff;
+  color: #000;
+}
+
+body.eink .header {
+  border-bottom-color: #000;
+}
+
+body.eink .header-clock {
+  color: #000;
+}
+
+body.eink .timeline-col {
+  border-right-color: #000;
+}
+
+body.eink .allday-band {
+  border-bottom-color: #000;
+}
+
+body.eink .allday-chip {
+  color: #000;
+  border: 1.5px solid #000;
+  background: #fff !important;
+}
+
+body.eink .hour-line {
+  border-top-color: #ccc;
+}
+
+body.eink .hour-label {
+  color: #333;
+}
+
+/* Each calendar source gets a different diagonal-stripe pattern via
+   data-cal-index attribute (0–7), set by app.js */
+body.eink .event-block {
+  color: #000;
+  border: 1.5px solid #000;
+  background: #fff !important;
+}
+
+body.eink .event-block[data-cal-index="0"] {
+  background: repeating-linear-gradient(
+    45deg, #000 0, #000 2px, #fff 2px, #fff 8px
+  ) !important;
+  color: #000;
+}
+body.eink .event-block[data-cal-index="1"] {
+  background: repeating-linear-gradient(
+    -45deg, #000 0, #000 2px, #fff 2px, #fff 8px
+  ) !important;
+}
+body.eink .event-block[data-cal-index="2"] {
+  background: repeating-linear-gradient(
+    90deg, #000 0, #000 2px, #fff 2px, #fff 8px
+  ) !important;
+}
+body.eink .event-block[data-cal-index="3"] {
+  background: repeating-linear-gradient(
+    0deg, #000 0, #000 2px, #fff 2px, #fff 8px
+  ) !important;
+}
+body.eink .event-block[data-cal-index="4"] {
+  background: repeating-linear-gradient(
+    45deg, #000 0, #000 4px, #fff 4px, #fff 8px
+  ) !important;
+}
+body.eink .event-block[data-cal-index="5"] {
+  background: repeating-linear-gradient(
+    -45deg, #000 0, #000 4px, #fff 4px, #fff 8px
+  ) !important;
+}
+body.eink .event-block[data-cal-index="6"] {
+  background: repeating-linear-gradient(
+    135deg, #000 0, #000 1px, #fff 1px, #fff 6px
+  ) !important;
+}
+body.eink .event-block[data-cal-index="7"] {
+  background: #000 !important;
+  color: #fff;
+}
+
+body.eink .now-line {
+  border-top-color: #000;
+  border-top-width: 2px;
+}
+body.eink .now-arrow {
+  border-left-color: #000;
+}
+
+body.eink .stale-note {
+  color: #555;
+}
+
+body.eink .tasks-title {
+  color: #000;
+}
+
+body.eink .task-section-title {
+  color: #000;
+  border-bottom-color: #000;
+}
+
+body.eink .task-due {
+  color: #555;
+}
+
+body.eink .task-row.overdue .task-due {
+  color: #000;
+  text-decoration: underline;
+}
+
+body.eink .task-row.overdue .task-title {
+  color: #000;
+  text-decoration: underline;
+}
+
+body.eink .fullscreen-btn {
+  color: #000;
+  background: rgba(0,0,0,0.07);
 }
