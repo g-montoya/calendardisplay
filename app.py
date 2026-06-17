@@ -55,7 +55,10 @@ def refresh_asana():
 
 
 def _refresh_loop(refresh_fn, config_key, default_minutes):
-    interval = max(1, int(_config.get(config_key, default_minutes))) * 60
+    try:
+        interval = max(1, int(_config.get(config_key, default_minutes))) * 60
+    except (ValueError, TypeError):
+        interval = default_minutes * 60
     while True:
         refresh_fn()
         time.sleep(interval)

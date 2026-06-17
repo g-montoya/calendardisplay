@@ -12,7 +12,8 @@
 
   // E-ink mode: set eink_mode: true in config.yaml (authoritative for Pi deployments)
   // or append ?eink=1 to the URL for ad-hoc testing. URL param takes precedence.
-  let einkMode = new URLSearchParams(window.location.search).get("eink") === "1";
+  const urlEinkParam = new URLSearchParams(window.location.search).get("eink") === "1";
+  let einkMode = urlEinkParam;
   if (einkMode) document.body.classList.add("eink");
 
   // ---------- Header: date + clock ----------
@@ -197,9 +198,7 @@
       latestEvents = data.events || [];
 
       // Server config is authoritative for eink_mode; URL param overrides for testing.
-      const serverEink = !!data.eink_mode;
-      const urlEink = new URLSearchParams(window.location.search).get("eink") === "1";
-      const shouldBeEink = urlEink || serverEink;
+      const shouldBeEink = urlEinkParam || !!data.eink_mode;
       if (shouldBeEink !== einkMode) {
         einkMode = shouldBeEink;
         document.body.classList.toggle("eink", einkMode);
@@ -223,7 +222,7 @@
     if (!data.sections || data.sections.length === 0) {
       const note = document.createElement("div");
       note.className = "empty-note";
-      note.textContent = "No tasks";
+      note.textContent = data.error ? "Task load error — retrying" : "No tasks";
       list.appendChild(note);
       return;
     }

@@ -92,16 +92,19 @@ done
 
 # --password-store=basic: skip keyring/wallet prompts entirely
 # --kiosk: true full-screen, no address bar, no window chrome
-chromium-browser \\
-  --noerrdialogs \\
-  --disable-infobars \\
-  --kiosk \\
-  --password-store=basic \\
-  --no-first-run \\
-  --disable-translate \\
-  --disable-features=TranslateUI \\
-  --check-for-update-interval=31536000 \\
-  "http://localhost:$PORT"
+while true; do
+  chromium-browser \\
+    --noerrdialogs \\
+    --disable-infobars \\
+    --kiosk \\
+    --password-store=basic \\
+    --no-first-run \\
+    --disable-translate \\
+    --disable-features=TranslateUI \\
+    --check-for-update-interval=31536000 \\
+    "http://localhost:$PORT"
+  sleep 5
+done
 EOF
 chmod +x "$REPO_DIR/kiosk.sh"
 

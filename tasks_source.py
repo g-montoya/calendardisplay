@@ -39,7 +39,7 @@ def get_tasks(config, extra_tasks=None):
     except (OSError, ValueError) as exc:
         file_error = str(exc)
 
-    incomplete = [t for t in file_tasks + list(extra_tasks or []) if not t.get("done")]
+    incomplete = [dict(t) for t in file_tasks + list(extra_tasks or []) if not t.get("done")]
 
     for task in incomplete:
         due = task.get("due")
