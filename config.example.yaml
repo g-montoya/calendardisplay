@@ -20,11 +20,17 @@ calendar_refresh_minutes: 10
 # Port the Flask server listens on
 port: 8080
 
-# Path to the tasks file (read-only display in v1)
+# Path to the local tasks file (always read; shown alongside Asana tasks if both configured)
 tasks_file: "data/tasks.json"
 
-# Optional Asana adapter — not used in v1
+# How often to re-fetch Asana tasks, in minutes (only used when asana.enabled is true)
+tasks_refresh_minutes: 5
+
+# Asana adapter — set enabled: true and fill in your token + project IDs to use it.
+# Get a Personal Access Token from https://app.asana.com/0/my-apps
+# Project IDs are the numbers in the URL: app.asana.com/0/<project_id>/...
 asana:
   enabled: false
-  token: ""
-  project_ids: []
+  token: "YOUR_ASANA_PERSONAL_ACCESS_TOKEN"
+  project_ids:
+    - "1234567890123456"

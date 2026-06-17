@@ -9,6 +9,7 @@ import yaml
 from flask import Flask, jsonify, send_from_directory
 from zoneinfo import ZoneInfo
 
+import asana_source
 import calendar_source
 import tasks_source
 
@@ -19,8 +20,13 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 app = Flask(__name__, static_folder=None)
 
 _config = None
+
 _events_cache = {"data": None}
 _events_lock = threading.Lock()
+
+# Asana task cache: populated by background thread when asana.enabled is true.
+_tasks_cache = {"tasks": [], "error": None}
+_tasks_lock = threading.Lock()
 
 
 def load_config():
@@ -28,13 +34,15 @@ def load_config():
         return yaml.safe_load(f)
 
 
+# ---------- Calendar refresh ----------
+
 def refresh_events():
     data = calendar_source.get_events(_config)
     with _events_lock:
         _events_cache["data"] = data
 
 
-def refresh_loop():
+def calendar_refresh_loop():
     interval = max(1, int(_config.get("calendar_refresh_minutes", 10))) * 60
     while True:
         try:
@@ -49,6 +57,28 @@ def refresh_loop():
                 }
         time.sleep(interval)
 
+
+# ---------- Asana task refresh ----------
+
+def refresh_asana():
+    tasks, error = asana_source.fetch_tasks(_config["asana"])
+    with _tasks_lock:
+        _tasks_cache["tasks"] = tasks
+        _tasks_cache["error"] = error
+
+
+def asana_refresh_loop():
+    interval = max(1, int(_config.get("tasks_refresh_minutes", 5))) * 60
+    while True:
+        try:
+            refresh_asana()
+        except Exception as exc:
+            with _tasks_lock:
+                _tasks_cache["error"] = f"Asana refresh failed: {exc}"
+        time.sleep(interval)
+
+
+# ---------- Routes ----------
 
 @app.route("/")
 def index():
@@ -77,15 +107,34 @@ def api_events():
 
 @app.route("/api/tasks")
 def api_tasks():
-    return jsonify(tasks_source.get_tasks(_config))
+    with _tasks_lock:
+        extra = list(_tasks_cache["tasks"])
+        asana_error = _tasks_cache["error"]
 
+    result = tasks_source.get_tasks(_config, extra_tasks=extra)
+
+    if asana_error and not result.get("error"):
+        result["error"] = asana_error
+    elif asana_error:
+        result["error"] = f"{result['error']}; {asana_error}"
+
+    return jsonify(result)
+
+
+# ---------- Startup ----------
 
 def create_app():
     global _config
     _config = load_config()
+
     refresh_events()
-    thread = threading.Thread(target=refresh_loop, daemon=True)
-    thread.start()
+    threading.Thread(target=calendar_refresh_loop, daemon=True).start()
+
+    asana_cfg = _config.get("asana") or {}
+    if asana_cfg.get("enabled"):
+        refresh_asana()
+        threading.Thread(target=asana_refresh_loop, daemon=True).start()
+
     return app
 
 

@@ -1,4 +1,4 @@
-"""Read and prepare the task list from tasks.json."""
+"""Read and prepare the task list from tasks.json and optional Asana cache."""
 
 import json
 from datetime import datetime
@@ -15,44 +15,52 @@ def _sort_key(task):
     )
 
 
-def get_tasks(config):
-    """Read tasks_file and return incomplete tasks grouped by section.
+def _add_overdue(task, now, tz):
+    due = task.get("due")
+    overdue = False
+    if due:
+        try:
+            due_dt = datetime.fromisoformat(due)
+            if due_dt.tzinfo is None:
+                due_dt = due_dt.replace(tzinfo=tz)
+            overdue = due_dt < now
+        except ValueError:
+            pass
+    task["overdue"] = overdue
 
-    Returns a dict:
+
+def get_tasks(config, extra_tasks=None):
+    """Return incomplete tasks grouped by section, sorted by due then priority.
+
+    extra_tasks: pre-fetched list of task dicts (e.g. from Asana cache) that
+    are merged with tasks.json before sorting. Pass None or [] to skip.
+
+    Returns:
       {
         "sections": [ {"name": str, "tasks": [task, ...]}, ... ],
         "error": str | None,
       }
-    Each task gains an "overdue" boolean based on the current time.
     """
     tz = ZoneInfo(config["timezone"])
     now = datetime.now(tz)
     path = config.get("tasks_file", "data/tasks.json")
 
+    file_tasks = []
+    file_error = None
     try:
         with open(path, "r", encoding="utf-8") as f:
-            tasks = json.load(f)
+            file_tasks = json.load(f)
     except (OSError, ValueError) as exc:
-        return {"sections": [], "error": str(exc)}
+        file_error = str(exc)
 
-    incomplete = [t for t in tasks if not t.get("done")]
+    all_tasks = file_tasks + list(extra_tasks or [])
+    incomplete = [t for t in all_tasks if not t.get("done")]
 
     for task in incomplete:
-        due = task.get("due")
-        overdue = False
-        if due:
-            try:
-                due_dt = datetime.fromisoformat(due)
-                if due_dt.tzinfo is None:
-                    due_dt = due_dt.replace(tzinfo=tz)
-                overdue = due_dt < now
-            except ValueError:
-                pass
-        task["overdue"] = overdue
+        _add_overdue(task, now, tz)
 
     incomplete.sort(key=_sort_key)
 
-    sections = []
     order = []
     by_section = {}
     for task in incomplete:
@@ -62,7 +70,6 @@ def get_tasks(config):
             order.append(section)
         by_section[section].append(task)
 
-    for name in order:
-        sections.append({"name": name, "tasks": by_section[name]})
+    sections = [{"name": name, "tasks": by_section[name]} for name in order]
 
-    return {"sections": sections, "error": None}
+    return {"sections": sections, "error": file_error}
