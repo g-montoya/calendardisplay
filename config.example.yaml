@@ -20,6 +20,9 @@ calendar_refresh_minutes: 10
 # Port the Flask server listens on
 port: 8080
 
+# Set to true when driving an e-ink display (light theme, stripe patterns instead of colors)
+eink_mode: false
+
 # Path to the local tasks file (always read; shown alongside Asana tasks if both configured)
 tasks_file: "data/tasks.json"
 

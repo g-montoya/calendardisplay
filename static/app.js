@@ -9,10 +9,10 @@
   let workingEndMin = 22 * 60;
   let latestEvents = [];
   const sourceIndexMap = {};
-  let sourceIndexNext = 0;
 
-  // E-ink mode: add ?eink=1 to the URL to enable.
-  const einkMode = new URLSearchParams(window.location.search).get("eink") === "1";
+  // E-ink mode: set eink_mode: true in config.yaml (authoritative for Pi deployments)
+  // or append ?eink=1 to the URL for ad-hoc testing. URL param takes precedence.
+  let einkMode = new URLSearchParams(window.location.search).get("eink") === "1";
   if (einkMode) document.body.classList.add("eink");
 
   // ---------- Header: date + clock ----------
@@ -90,7 +90,7 @@
 
   function calIndex(source) {
     if (!(source in sourceIndexMap)) {
-      sourceIndexMap[source] = sourceIndexNext++ % 8;
+      sourceIndexMap[source] = Object.keys(sourceIndexMap).length % 8;
     }
     return sourceIndexMap[source];
   }
@@ -195,6 +195,16 @@
       workingStartMin = parseHHMM(data.working_hours_start || "06:00");
       workingEndMin = parseHHMM(data.working_hours_end || "22:00");
       latestEvents = data.events || [];
+
+      // Server config is authoritative for eink_mode; URL param overrides for testing.
+      const serverEink = !!data.eink_mode;
+      const urlEink = new URLSearchParams(window.location.search).get("eink") === "1";
+      const shouldBeEink = urlEink || serverEink;
+      if (shouldBeEink !== einkMode) {
+        einkMode = shouldBeEink;
+        document.body.classList.toggle("eink", einkMode);
+      }
+
       renderGrid();
       renderEvents(latestEvents);
       renderNowLine();
@@ -256,8 +266,6 @@
   }
 
   // ---------- Midnight reload ----------
-  // When the calendar day rolls over, reload the page so the timeline and
-  // event data reset cleanly for the new day.
 
   const startDay = new Date().toDateString();
 

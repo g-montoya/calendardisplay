@@ -24,7 +24,6 @@ _config = None
 _events_cache = {"data": None}
 _events_lock = threading.Lock()
 
-# Asana task cache: populated by background thread when asana.enabled is true.
 _tasks_cache = {"tasks": [], "error": None}
 _tasks_lock = threading.Lock()
 
@@ -34,47 +33,31 @@ def load_config():
         return yaml.safe_load(f)
 
 
-# ---------- Calendar refresh ----------
+# ---------- Refresh functions (never raise; store errors in cache) ----------
 
 def refresh_events():
-    data = calendar_source.get_events(_config)
+    try:
+        data = calendar_source.get_events(_config)
+    except Exception as exc:
+        data = {"events": [], "stale": True, "stale_since": None, "errors": [str(exc)]}
     with _events_lock:
         _events_cache["data"] = data
 
 
-def calendar_refresh_loop():
-    interval = max(1, int(_config.get("calendar_refresh_minutes", 10))) * 60
-    while True:
-        try:
-            refresh_events()
-        except Exception as exc:
-            with _events_lock:
-                _events_cache["data"] = {
-                    "events": [],
-                    "stale": True,
-                    "stale_since": None,
-                    "errors": [f"refresh failed: {exc}"],
-                }
-        time.sleep(interval)
-
-
-# ---------- Asana task refresh ----------
-
 def refresh_asana():
-    tasks, error = asana_source.fetch_tasks(_config["asana"])
+    try:
+        tasks, error = asana_source.fetch_tasks(_config["asana"])
+    except Exception as exc:
+        tasks, error = [], str(exc)
     with _tasks_lock:
         _tasks_cache["tasks"] = tasks
         _tasks_cache["error"] = error
 
 
-def asana_refresh_loop():
-    interval = max(1, int(_config.get("tasks_refresh_minutes", 5))) * 60
+def _refresh_loop(refresh_fn, config_key, default_minutes):
+    interval = max(1, int(_config.get(config_key, default_minutes))) * 60
     while True:
-        try:
-            refresh_asana()
-        except Exception as exc:
-            with _tasks_lock:
-                _tasks_cache["error"] = f"Asana refresh failed: {exc}"
+        refresh_fn()
         time.sleep(interval)
 
 
@@ -102,6 +85,7 @@ def api_events():
         "now": datetime.now(tz).isoformat(),
         "working_hours_start": _config.get("working_hours_start", "06:00"),
         "working_hours_end": _config.get("working_hours_end", "22:00"),
+        "eink_mode": bool(_config.get("eink_mode", False)),
     })
 
 
@@ -112,12 +96,7 @@ def api_tasks():
         asana_error = _tasks_cache["error"]
 
     result = tasks_source.get_tasks(_config, extra_tasks=extra)
-
-    if asana_error and not result.get("error"):
-        result["error"] = asana_error
-    elif asana_error:
-        result["error"] = f"{result['error']}; {asana_error}"
-
+    result["error"] = "; ".join(filter(None, [result.get("error"), asana_error])) or None
     return jsonify(result)
 
 
@@ -127,6 +106,7 @@ def _ensure_tasks_file():
     path = _config.get("tasks_file", "data/tasks.json")
     if not os.path.isabs(path):
         path = os.path.join(BASE_DIR, path)
+        _config["tasks_file"] = path
     if not os.path.exists(path):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
@@ -136,16 +116,16 @@ def _ensure_tasks_file():
 def create_app():
     global _config
     _config = load_config()
-
     _ensure_tasks_file()
 
-    refresh_events()
-    threading.Thread(target=calendar_refresh_loop, daemon=True).start()
+    threading.Thread(
+        target=_refresh_loop, args=(refresh_events, "calendar_refresh_minutes", 10), daemon=True
+    ).start()
 
-    asana_cfg = _config.get("asana") or {}
-    if asana_cfg.get("enabled"):
-        refresh_asana()
-        threading.Thread(target=asana_refresh_loop, daemon=True).start()
+    if _config.get("asana", {}).get("enabled"):
+        threading.Thread(
+            target=_refresh_loop, args=(refresh_asana, "tasks_refresh_minutes", 5), daemon=True
+        ).start()
 
     return app
 

@@ -15,25 +15,11 @@ def _sort_key(task):
     )
 
 
-def _add_overdue(task, now, tz):
-    due = task.get("due")
-    overdue = False
-    if due:
-        try:
-            due_dt = datetime.fromisoformat(due)
-            if due_dt.tzinfo is None:
-                due_dt = due_dt.replace(tzinfo=tz)
-            overdue = due_dt < now
-        except ValueError:
-            pass
-    task["overdue"] = overdue
-
-
 def get_tasks(config, extra_tasks=None):
     """Return incomplete tasks grouped by section, sorted by due then priority.
 
-    extra_tasks: pre-fetched list of task dicts (e.g. from Asana cache) that
-    are merged with tasks.json before sorting. Pass None or [] to skip.
+    extra_tasks: pre-fetched list of task dicts (e.g. from Asana cache) merged
+    with tasks.json before sorting. Pass None or [] to skip.
 
     Returns:
       {
@@ -53,11 +39,20 @@ def get_tasks(config, extra_tasks=None):
     except (OSError, ValueError) as exc:
         file_error = str(exc)
 
-    all_tasks = file_tasks + list(extra_tasks or [])
-    incomplete = [t for t in all_tasks if not t.get("done")]
+    incomplete = [t for t in file_tasks + list(extra_tasks or []) if not t.get("done")]
 
     for task in incomplete:
-        _add_overdue(task, now, tz)
+        due = task.get("due")
+        overdue = False
+        if due:
+            try:
+                due_dt = datetime.fromisoformat(due)
+                if due_dt.tzinfo is None:
+                    due_dt = due_dt.replace(tzinfo=tz)
+                overdue = due_dt < now
+            except ValueError:
+                pass
+        task["overdue"] = overdue
 
     incomplete.sort(key=_sort_key)
 
@@ -70,6 +65,7 @@ def get_tasks(config, extra_tasks=None):
             order.append(section)
         by_section[section].append(task)
 
-    sections = [{"name": name, "tasks": by_section[name]} for name in order]
-
-    return {"sections": sections, "error": file_error}
+    return {
+        "sections": [{"name": n, "tasks": by_section[n]} for n in order],
+        "error": file_error,
+    }
