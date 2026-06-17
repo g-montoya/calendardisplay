@@ -123,9 +123,21 @@ def api_tasks():
 
 # ---------- Startup ----------
 
+def _ensure_tasks_file():
+    path = _config.get("tasks_file", "data/tasks.json")
+    if not os.path.isabs(path):
+        path = os.path.join(BASE_DIR, path)
+    if not os.path.exists(path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("[]\n")
+
+
 def create_app():
     global _config
     _config = load_config()
+
+    _ensure_tasks_file()
 
     refresh_events()
     threading.Thread(target=calendar_refresh_loop, daemon=True).start()

@@ -210,14 +210,6 @@
     const list = document.getElementById("tasks-list");
     list.innerHTML = "";
 
-    if (data.error) {
-      const note = document.createElement("div");
-      note.className = "empty-note";
-      note.textContent = "Could not read tasks";
-      list.appendChild(note);
-      return;
-    }
-
     if (!data.sections || data.sections.length === 0) {
       const note = document.createElement("div");
       note.className = "empty-note";
