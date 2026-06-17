@@ -34,3 +34,4 @@ asana:
   token: "YOUR_ASANA_PERSONAL_ACCESS_TOKEN"
   project_ids:
     - "1234567890123456"
+    - "9876543210987654"
