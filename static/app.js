@@ -54,6 +54,10 @@
     return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   }
 
+  function formatDate(date) {
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  }
+
   // ---------- Timeline grid ----------
 
   function renderGrid() {
@@ -244,7 +248,7 @@
         const dueEl = document.createElement("div");
         dueEl.className = "task-due";
         if (task.due) {
-          dueEl.textContent = formatTime(new Date(task.due));
+          dueEl.textContent = formatDate(new Date(task.due));
         }
 
         row.appendChild(titleEl);
